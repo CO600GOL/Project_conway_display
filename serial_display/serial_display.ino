@@ -39,14 +39,15 @@ uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 // the second value to number of pixels in a column.
 Adafruit_WS2801 strip = Adafruit_WS2801((uint16_t)5, (uint16_t)5, dataPin, clockPin);
 
+uint32_t w = 5;
+uint32_t h = 5;
+
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
 void setup() {
   uint32_t x, y;
-  uint32_t w = 5;
-  uint32_t h = 5;
-  
+   
   strip.begin();
 
   // Update LED contents, to start they are all 'off'
@@ -72,14 +73,43 @@ void setup() {
 void loop() {
   char cmd[4];
   if (stringComplete) {
-    Serial.println("boobies");
     strncpy(cmd, (char*)inputString.c_str(), 3);
     cmd[3] = '\0';
-    Serial.println(cmd); 
-    
+    if (strcmp(cmd, "clr") == 0){
+      clear(); 
+    }
+    else if (strcmp(cmd, "set") == 0){
+      uint32_t xp, yp;
+      int i = 0;
+      while (inputString[i] != ' '){i++;}
+      i++;
+      xp = inputString[i] - 48;
+      
+      while (inputString[i] != ' '){i++;}
+      i++;
+      yp = inputString[i] - 48;
+      
+      Serial.println(printf("%sx%s", xp, yp));
+    }
+    else{
+      Serial.println("Command not found");
+    }
     inputString = "";
     stringComplete = false;
   }
+}
+
+void clear() {
+  uint32_t x, y;
+  // Set (0, 0) 
+  for (x=0; x<w; x++){
+    for (y=0; y<h; y++){
+      if (x==y){
+        strip.setPixelColor(x, y, 0, 0, 0);    
+      }
+    }  
+  }
+  strip.show();
 }
 
 /*

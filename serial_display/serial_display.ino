@@ -1,5 +1,7 @@
 #include "SPI.h"
 #include "Adafruit_WS2801.h"
+#include <stdio.h>
+#include <string.h>
 
 /*****************************************************************************
 Example sketch for driving Adafruit WS2801 pixels!
@@ -37,6 +39,9 @@ uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
 // the second value to number of pixels in a column.
 Adafruit_WS2801 strip = Adafruit_WS2801((uint16_t)5, (uint16_t)5, dataPin, clockPin);
 
+String inputString = "";         // a string to hold incoming data
+boolean stringComplete = false;  // whether the string is complete
+
 void setup() {
   uint32_t x, y;
   uint32_t w = 5;
@@ -50,16 +55,50 @@ void setup() {
   // Set (0, 0) 
   for (x=0; x<w; x++){
     for (y=0; y<h; y++){
-      if (x == y){
+      if (x==y){
         strip.setPixelColor(x, y, 50, 0, 0);    
-      }  
+      }
     }  
   }
   strip.show();
+  
+  // initialize serial:
+  Serial.begin(9600);
+  // reserve 200 bytes for the inputString:
+  inputString.reserve(200);
 }
 
 
 void loop() {
-  while (true){};
+  char cmd[4];
+  if (stringComplete) {
+    Serial.println("boobies");
+    strncpy(cmd, (char*)inputString.c_str(), 3);
+    cmd[3] = '\0';
+    Serial.println(cmd); 
+    
+    inputString = "";
+    stringComplete = false;
+  }
+}
+
+/*
+  SerialEvent occurs whenever a new data comes in the
+ hardware serial RX.  This routine is run between each
+ time loop() runs, so using delay inside loop can delay
+ response.  Multiple bytes of data may be available.
+ */
+void serialEvent() {
+  while (Serial.available()) {
+    // get the new byte:
+    char inChar = (char)Serial.read(); 
+    // add it to the inputString:
+    inputString += inChar;
+    // if the incoming character is a newline, set a flag
+    // so the main loop can do something about it:
+    if (inChar == '\n') {
+      stringComplete = true;
+    } 
+  }
 }
 

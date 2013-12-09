@@ -89,7 +89,9 @@ void loop() {
       i++;
       yp = inputString[i] - 48;
       
-      Serial.println(printf("%sx%s", xp, yp));
+      strip.setPixelColor(xp, yp, 25, 25, 25); 
+      strip.show();
+      
     }
     else{
       Serial.println("Command not found");
@@ -104,9 +106,7 @@ void clear() {
   // Set (0, 0) 
   for (x=0; x<w; x++){
     for (y=0; y<h; y++){
-      if (x==y){
         strip.setPixelColor(x, y, 0, 0, 0);    
-      }
     }  
   }
   strip.show();

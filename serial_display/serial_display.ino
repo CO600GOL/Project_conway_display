@@ -54,12 +54,12 @@ void setup() {
   strip.show();
   
   // Set (0, 0) 
-  for (x=0; x<w; x++){
-    for (y=0; y<h; y++){
-      if (x==y){
-        strip.setPixelColor(x, y, 50, 0, 0);    
-      }
-    }  
+  //for (x=0; x<w; x++){
+  //  for (y=0; y<h; y++){
+  //    if (x==y){
+  //      strip.setPixelColor(x, y, 50, 0, 0);    
+  //    }
+  //  }  
   }
   strip.show();
   
@@ -89,9 +89,10 @@ void loop() {
       i++;
       yp = inputString[i] - 48;
       
-      strip.setPixelColor(xp, yp, 25, 25, 25); 
+      strip.setPixelColor(xp, yp, 25, 25, 25);      
+    }
+    else if (strcmp(cmd, "drw") == 0){
       strip.show();
-      
     }
     else{
       Serial.println("Command not found");
@@ -109,7 +110,6 @@ void clear() {
         strip.setPixelColor(x, y, 0, 0, 0);    
     }  
   }
-  strip.show();
 }
 
 /*

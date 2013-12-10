@@ -60,8 +60,8 @@ void setup() {
   //      strip.setPixelColor(x, y, 50, 0, 0);    
   //    }
   //  }  
-  }
-  strip.show();
+  //}
+  //strip.show();
   
   // initialize serial:
   Serial.begin(9600);

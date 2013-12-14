@@ -1,74 +1,52 @@
-#include "SPI.h"
-#include "Adafruit_WS2801.h"
-#include <stdio.h>
-#include <string.h>
+/*********************************************************************
+This is an example sketch for our Monochrome Nokia 5110 LCD Displays
 
-/*****************************************************************************
-Example sketch for driving Adafruit WS2801 pixels!
+  Pick one up today in the adafruit shop!
+  ------> http://www.adafruit.com/products/338
 
+These displays use SPI to communicate, 4 or 5 pins are required to
+interface
 
-  Designed specifically to work with the Adafruit RGB Pixels!
-  12mm Bullet shape ----> https://www.adafruit.com/products/322
-  12mm Flat shape   ----> https://www.adafruit.com/products/738
-  36mm Square shape ----> https://www.adafruit.com/products/683
+Adafruit invests time and resources providing this open source code,
+please support Adafruit and open-source hardware by purchasing
+products from Adafruit!
 
-  These pixels use SPI to transmit the color data, and have built in
-  high speed PWM drivers for 24 bit color per pixel
-  2 pins are required to interface
+Written by Limor Fried/Ladyada  for Adafruit Industries.
+BSD license, check license.txt for more information
+All text above, and the splash screen must be included in any redistribution
+*********************************************************************/
 
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
 
-  Written by David Kavanagh (dkavanagh@gmail.com).  
-  BSD license, all text above must be included in any redistribution
-
-*****************************************************************************/
-
-// Choose which 2 pins you will use for output.
-// Can be any valid output pins.
-// The colors of the wires may be totally different so
-// BE SURE TO CHECK YOUR PIXELS TO SEE WHICH WIRES TO USE!
-uint8_t dataPin  = 2;    // Yellow wire on Adafruit Pixels
-uint8_t clockPin = 3;    // Green wire on Adafruit Pixels
-
-// Don't forget to connect the ground wire to Arduino ground,
-// and the +5V wire to a +5V supply
-
-// Set the first variable to the NUMBER of pixels in a row and
-// the second value to number of pixels in a column.
-Adafruit_WS2801 strip = Adafruit_WS2801((uint16_t)5, (uint16_t)5, dataPin, clockPin);
-
-uint32_t w = 5;
-uint32_t h = 5;
+// pin 7 - Serial clock out (SCLK)
+// pin 6 - Serial data out (DIN)
+// pin 5 - Data/Command select (D/C)
+// pin 4 - LCD chip select (CS)
+// pin 3 - LCD reset (RST)
+Adafruit_PCD8544 display = Adafruit_PCD8544
+(7, 6, 5, 4, 3);
 
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
-void setup() {
-  uint32_t x, y;
-   
-  strip.begin();
+void setup()   {
+  Serial.begin(115200);
 
-  // Update LED contents, to start they are all 'off'
-  strip.show();
+  display.begin();
+  // init done
+
+  // you can change the contrast around to adapt the display
+  // for the best viewing!
+  display.setContrast(55);
+
+  display.display(); // show splashscreen
+  delay(2000);
+  //display.clearDisplay();   // clears the screen and buffer
+  //display.display();
   
-  // Set (0, 0) 
-  //for (x=0; x<w; x++){
-  //  for (y=0; y<h; y++){
-  //    if (x==y){
-  //      strip.setPixelColor(x, y, 50, 0, 0);    
-  //    }
-  //  }  
-  }
-  strip.show();
-  
-  // initialize serial:
-  Serial.begin(9600);
-  // reserve 200 bytes for the inputString:
   inputString.reserve(200);
 }
-
 
 void loop() {
   char cmd[4];
@@ -79,20 +57,36 @@ void loop() {
       clear(); 
     }
     else if (strcmp(cmd, "set") == 0){
-      uint32_t xp, yp;
+      uint32_t xp = 0; 
+      uint32_t yp = 0;
       int i = 0;
-      while (inputString[i] != ' '){i++;}
-      i++;
-      xp = inputString[i] - 48;
       
+      // Ignore command
       while (inputString[i] != ' '){i++;}
-      i++;
-      yp = inputString[i] - 48;
       
-      strip.setPixelColor(xp, yp, 25, 25, 25);      
+      // Ignore spaces
+      while (inputString[i] == ' '){i++;}
+      
+      // Build x position
+      while (inputString[i] != ' '){
+        xp = (xp * 10) + (inputString[i] - 48);
+        i++;
+      }
+            
+      // Ignore spaces
+      while (inputString[i] == ' '){i++;}
+          
+      // Build x position
+      while (inputString[i] != '\n'){
+        yp = (yp * 10)  + (inputString[i] - 48);
+        i++;
+      }
+      
+      display.drawPixel(xp, yp, 0xFF);
+      Serial.write("OK");
     }
     else if (strcmp(cmd, "drw") == 0){
-      strip.show();
+      display.display();
     }
     else{
       Serial.println("Command not found");
@@ -103,13 +97,8 @@ void loop() {
 }
 
 void clear() {
-  uint32_t x, y;
-  // Set (0, 0) 
-  for (x=0; x<w; x++){
-    for (y=0; y<h; y++){
-        strip.setPixelColor(x, y, 0, 0, 0);    
-    }  
-  }
+  // Clear display
+  display.clearDisplay();
 }
 
 /*
@@ -131,4 +120,3 @@ void serialEvent() {
     } 
   }
 }
-

@@ -42,7 +42,7 @@ void setup()   {
 
   display.display(); // show splashscreen
   delay(2000);
-  //display.clearDisplay();   // clears the screen and buffer
+  display.clearDisplay();   // clears the screen and buffer
   //display.display();
   
   inputString.reserve(200);
